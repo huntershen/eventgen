@@ -2,7 +2,13 @@
 generator = windbag
 earliest = now
 latest = now
-interval = 10
-count = 50000
-outputMode = devnull
-backfill = -1d
+#interval = 10
+#count = 50000
+#outputMode = devnull
+#backfill = -1d
+
+index = jacktest
+perDayVolume = 1000
+outputMode = file
+fileName = gen_output.txt
+httpeventServers = {"servers":[{ "protocol":"https", "address":"10.224.62.249", "port":"38994", "key":"00000000-0000-0000-0000-000000000000"}]}

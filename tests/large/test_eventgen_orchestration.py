@@ -248,6 +248,7 @@ class TestEventgenOrchestration(object):
 		# Must initialize a stanza with the perDayVolume setting before hitting the /volume endpoint
 		r = requests.put("http://127.0.0.1:{}/conf".format(self.server_eventgen_webport), json={"windbag": {}})
 		assert r.status_code == 200
+		assert json.loads(r.content)
 		r = requests.post("http://127.0.0.1:{}/volume".format(self.server_eventgen_webport), json={"perDayVolume": 10})
 		assert r.status_code == 200
 		assert json.loads(r.content)
