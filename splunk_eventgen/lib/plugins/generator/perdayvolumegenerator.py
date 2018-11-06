@@ -57,19 +57,14 @@ class PerDayVolumeGenerator(GeneratorPlugin):
             while currentreadsize <= size:
                 targetline = linecount % linesinfile
                 sizeremaining = size - currentreadsize
-
-                #targetlinesize = syself._sample.getsizeof(self._sample.sampleDict[targetline])
-                targetlinesize =getsizeof(self._sample.sampleDict[targetline]['_raw'])
-
+                targetlinesize = getsizeof(self._sample.sampleDict[targetline]['_raw'])
                 if targetlinesize <= sizeremaining or targetlinesize*.9 <= sizeremaining:
                     currentreadsize += targetlinesize
                     eventsDict.append(self._sample.sampleDict[targetline])
                 else:
                     break
                 linecount += 1
-
             self.logger.debugv("Events fill complete for sample '%s' in app '%s' length %d" % (self._sample.name, self._sample.app, len(eventsDict)))
-
 
         for x in range(len(eventsDict)):
             event = eventsDict[x]['_raw']
