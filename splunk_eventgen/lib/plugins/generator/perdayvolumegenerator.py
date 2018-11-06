@@ -1,5 +1,6 @@
 from __future__ import division
 from generatorplugin import GeneratorPlugin
+from sys import getsizeof
 import datetime, time
 import random
 
@@ -33,13 +34,13 @@ class PerDayVolumeGenerator(GeneratorPlugin):
             while currentSize < size:
                 currentevent = self._sample.sampleDict[random.randint(0, sdlen-1)]
                 eventsDict.append(currentevent)
-                currentSize += len(currentevent['_raw'])
+                currentSize += getsizeof(currentevent['_raw'])
 
         # If we're bundlelines, create count copies of the sampleDict
         elif self._sample.bundlelines:
             self.logger.debugv("Bundlelines, filling eventsDict for sample '%s' in app '%s' with %d copies of sampleDict" % (self._sample.name, self._sample.app, size))
             while currentSize <= size:
-                sizeofsample = sum(len(sample['_raw']) for sample in self._sample.sampleDict)
+                sizeofsample = sum(getsizeof(sample['_raw']) for sample in self._sample.sampleDict)
                 eventsDict.extend(self._sample.sampleDict)
                 currentSize += sizeofsample
 
@@ -58,7 +59,7 @@ class PerDayVolumeGenerator(GeneratorPlugin):
                 sizeremaining = size - currentreadsize
 
                 #targetlinesize = syself._sample.getsizeof(self._sample.sampleDict[targetline])
-                targetlinesize =len(self._sample.sampleDict[targetline]['_raw'])
+                targetlinesize =getsizeof(self._sample.sampleDict[targetline]['_raw'])
 
                 if targetlinesize <= sizeremaining or targetlinesize*.9 <= sizeremaining:
                     currentreadsize += targetlinesize

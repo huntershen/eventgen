@@ -101,7 +101,7 @@ class PerDayVolume(ConfigRater):
         ret = int(round(perintervalvolume * rateFactor, 0))
         if rateFactor != 1.0:
             self.logger.debug("Original count: %s Rated count: %s Rate factor: %s" % (count, ret, rateFactor))
-        self.logger.info("Finished rating, returning interval rate: %s" % ret)
+        self.logger.info("Finished rating, returning interval rate: %s GB" % (ret / 1000 / 1000))
         return ret
 
 def load():
