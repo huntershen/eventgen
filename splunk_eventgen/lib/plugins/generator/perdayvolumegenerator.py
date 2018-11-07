@@ -1,6 +1,5 @@
 from __future__ import division
 from generatorplugin import GeneratorPlugin
-from sys import getsizeof
 import datetime, time
 import random
 
@@ -34,13 +33,13 @@ class PerDayVolumeGenerator(GeneratorPlugin):
             while currentSize < size:
                 currentevent = self._sample.sampleDict[random.randint(0, sdlen-1)]
                 eventsDict.append(currentevent)
-                currentSize += getsizeof(currentevent['_raw'])
+                currentSize += len(currentevent['_raw'])
 
         # If we're bundlelines, create count copies of the sampleDict
         elif self._sample.bundlelines:
             self.logger.debugv("Bundlelines, filling eventsDict for sample '%s' in app '%s' with %d copies of sampleDict" % (self._sample.name, self._sample.app, size))
             while currentSize <= size:
-                sizeofsample = sum(getsizeof(sample['_raw']) for sample in self._sample.sampleDict)
+                sizeofsample = sum(len(sample['_raw']) for sample in self._sample.sampleDict)
                 eventsDict.extend(self._sample.sampleDict)
                 currentSize += sizeofsample
 
@@ -57,7 +56,7 @@ class PerDayVolumeGenerator(GeneratorPlugin):
             while currentreadsize <= size:
                 targetline = linecount % linesinfile
                 sizeremaining = size - currentreadsize
-                targetlinesize = getsizeof(self._sample.sampleDict[targetline]['_raw'])
+                targetlinesize = len(self._sample.sampleDict[targetline]['_raw'])
                 if targetlinesize <= sizeremaining or targetlinesize*.9 <= sizeremaining:
                     currentreadsize += targetlinesize
                     eventsDict.append(self._sample.sampleDict[targetline])
@@ -66,48 +65,7 @@ class PerDayVolumeGenerator(GeneratorPlugin):
                 linecount += 1
             self.logger.debugv("Events fill complete for sample '%s' in app '%s' length %d" % (self._sample.name, self._sample.app, len(eventsDict)))
 
-        for x in range(len(eventsDict)):
-            event = eventsDict[x]['_raw']
-
-            # Maintain state for every token in a given event
-            # Hash contains keys for each file name which is assigned a list of values
-            # picked from a random line in that file
-            mvhash = { }
-
-            ## Iterate tokens
-            for token in self._sample.tokens:
-                token.mvhash = mvhash
-                event = token.replace(event, et=earliest, lt=latest, s=self._sample)
-                if token.replacementType == 'timestamp' and self._sample.timeField != '_raw':
-                    self._sample.timestamp = None
-                    token.replace(self._sample.sampleDict[x][self._sample.timeField], et=self._sample.earliestTime(), lt=self._sample.latestTime(), s=self._sample)
-            if(self._sample.hostToken):
-                # clear the host mvhash every time, because we need to re-randomize it
-                self._sample.hostToken.mvhash = {}
-
-            host = eventsDict[x]['host']
-            if (self._sample.hostToken):
-                host = self._sample.hostToken.replace(host, s=self._sample)
-
-            if self._sample.timestamp == None:
-                self._sample.timestamp = self._sample.now()
-            l = [ { '_raw': event,
-                    'index': eventsDict[x]['index'],
-                    'host': host,
-                    'hostRegex': self._sample.hostRegex,
-                    'source': eventsDict[x]['source'],
-                    'sourcetype': eventsDict[x]['sourcetype'],
-                    '_time': time.mktime(self._sample.timestamp.timetuple()) } ]
-
-            self._out.bulksend(l)
-            self._sample.timestamp = None
-
-        endTime = datetime.datetime.now()
-        timeDiff = endTime - startTime
-        timeDiffFrac = "%d.%06d" % (timeDiff.seconds, timeDiff.microseconds)
-        self.logger.debugv("Interval complete, flushing feed")
-        self._out.flush(endOfInterval=True)
-        self.logger.info("Generation of sample '%s' in app '%s' completed in %s secondself._sample." % (self._sample.name, self._sample.app, timeDiffFrac) )
+        GeneratorPlugin.build_events(self, eventsDict, startTime, earliest, latest)
 
 def load():
     return PerDayVolumeGenerator
