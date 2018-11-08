@@ -102,9 +102,8 @@ class PerDayVolume(ConfigRater):
         ret = int(round(perintervalvolume * rateFactor, 0))
         if rateFactor != 1.0:
             self.logger.debug("Original count: %s Rated count: %s Rate factor: %s" % (count, ret, rateFactor))
-        # Convert bytes/interval rate to MB/interval
-        self.logger.info("Finished rating, interval: {0}s, generation rate: {1} MB/interval".format(interval, round((ret / 1024 / 1024), 4)))
-
+        # Too much output--suppress logger statement; Convert bytes/interval rate to MB/interval
+        # self.logger.info("Finished rating, interval: {0}s, generation rate: {1} MB/interval".format(interval, round((ret / 1024 / 1024), 4)))
         return ret
 
 

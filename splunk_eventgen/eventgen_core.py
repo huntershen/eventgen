@@ -327,8 +327,7 @@ class EventGenerator(object):
                 startTime = time.time()
                 item.run()
                 totalTime = time.time() - startTime
-                self.logger.info("self.config.interval: {}".format(self.config.interval))
-                if self.config.interval and totalTime > self.config.interval:
+                if totalTime > self.config.interval:
                     self.logger.warning("work took longer than current interval, queue/threading throughput limitation")
                 work_queue.task_done()
             except Empty:
