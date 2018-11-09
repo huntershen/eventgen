@@ -278,6 +278,8 @@ Output Queue Status: {7}\n'''
             self.eventgen_dependency.configured = True
             self.eventgen_dependency.configfile = CUSTOM_CONFIG_PATH
             self.eventgen_dependency.eventgen.reload_conf(CUSTOM_CONFIG_PATH)
+            if self.eventgen_dependency.eventgen.check_running():
+                self.restart()
             return self.get_conf()
         except Exception as e:
             self.log.exception(e)
